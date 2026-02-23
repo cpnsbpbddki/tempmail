@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JituPasna Temp Mail</title>
+    
+    <!-- Memuat Tailwind CSS langsung dari CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Memuat React & ReactDOM dari CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    
+    <!-- Memuat Babel untuk mengompilasi JSX secara langsung di browser -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        /* Animasi dan Gaya Khusus (Glassmorphism) */
+        @keyframes panBackground {
+            0% { background-position: 0% 50%; background-size: 110%; }
+            50% { background-position: 100% 50%; background-size: 120%; }
+            100% { background-position: 0% 50%; background-size: 110%; }
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 15px rgba(139, 92, 246, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(139, 92, 246, 0.6); }
+            100% { box-shadow: 0 0 15px rgba(139, 92, 246, 0.3); }
+        }
+        .anime-bg {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: -2;
+            background-image: url('https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=2560&auto=format&fit=crop');
+            background-size: cover;
+            background-repeat: no-repeat;
+            animation: panBackground 40s infinite alternate ease-in-out;
+        }
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: -1;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 27, 75, 0.85) 100%);
+            backdrop-filter: blur(4px);
+        }
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .float-anim { animation: float 6s ease-in-out infinite; }
+        .glow-anim { animation: pulse-glow 3s infinite; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 8px; }
+        ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.5); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.8); }
+    </style>
+</head>
+<body class="bg-gray-900 text-white font-sans antialiased overflow-x-hidden">
+    <!-- Wadah untuk Aplikasi React -->
+    <div id="root"></div>
+
+    <!-- Kode Logika dan Tampilan Website (JSX) -->
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- Komponen Icon SVG ---
+        const Mail = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>;
+        const Copy = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>;
+        const Trash2 = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>;
+        const RefreshCw = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>;
+        const ChevronLeft = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>;
+        const Bot = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>;
+        const Zap = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>;
+        const ExternalLink = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>;
+
+        const DOMAINS = [
+            'jitupasna.online',
+            'satu.jitupasna.online',
+            'dua.jitupasna.online',
+            'tiga.jitupasna.online'
+        ];
+
+        function App() {
+            const [emailName, setEmailName] = useState('');
+            const [selectedDomain, setSelectedDomain] = useState(DOMAINS[0]);
+            const [inbox, setInbox] = useState([]);
+            const [selectedEmail, setSelectedEmail] = useState(null);
+            const [isRefreshing, setIsRefreshing] = useState(false);
+            const [showTelegramModal, setShowTelegramModal] = useState(false);
+            const [copied, setCopied] = useState(false);
+
+            useEffect(() => {
+                generateRandomName();
+                // Simulasi email masuk setelah 3 detik
+                setTimeout(() => {
+                    receiveMockEmail();
+                }, 3000);
+            }, []);
+
+            const generateRandomName = () => {
+                const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+                let result = '';
+                for (let i = 0; i < 8; i++) {
+                    result += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                setEmailName(result);
+            };
+
+            const getFullEmail = () => `${emailName || 'user'}@${selectedDomain}`;
+
+            const copyToClipboard = async () => {
+                try {
+                    await navigator.clipboard.writeText(getFullEmail());
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                } catch (err) {
+                    const textArea = document.createElement("textarea");
+                    textArea.value = getFullEmail();
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand("copy");
+                    document.body.removeChild(textArea);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                }
+            };
+
+            const refreshInbox = () => {
+                setIsRefreshing(true);
+                // Tempat meletakkan API fetch ke Cloudflare Worker
+                setTimeout(() => {
+                    setIsRefreshing(false);
+                }, 1000);
+            };
+
+            const deleteEmail = (id, e) => {
+                e.stopPropagation();
+                setInbox(inbox.filter(email => email.id !== id));
+                if (selectedEmail && selectedEmail.id === id) {
+                    setSelectedEmail(null);
+                }
+            };
+
+            const deleteAll = () => {
+                setInbox([]);
+                setSelectedEmail(null);
+            };
+
+            const receiveMockEmail = () => {
+                const newEmail = {
+                    id: Date.now().toString(),
+                    sender: 'system@jaringan.anime',
+                    subject: 'Selamat Datang di JituPasna Temp Mail!',
+                    body: `Hai! Ini adalah simulasi email masuk.\n\nSistem ini siap menerima email dari domain:\n- jitupasna.online\n- satu.jitupasna.online\n- dua.jitupasna.online\n- tiga.jitupasna.online\n\nUntuk mengaktifkan penerimaan email sungguhan, pastikan Anda telah memasang script Cloudflare Worker yang ada di panduan.\n\nTerima kasih!`,
+                    time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+                };
+                setInbox(prev => [newEmail, ...prev]);
+            };
+
+            return (
+                <div className="min-h-screen relative flex flex-col items-center p-4 sm:p-8">
+                    <div className="anime-bg"></div>
+                    <div className="overlay"></div>
+
+                    {/* Header */}
+                    <header className="w-full max-w-4xl flex justify-between items-center mb-10 mt-4 float-anim">
+                        <div className="flex items-center gap-3">
+                            <div className="p-3 bg-violet-600 rounded-xl glow-anim">
+                                <Zap className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                                <h1 className="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-violet-400 to-fuchsia-400 tracking-wider">
+                                    JituPasna Mail
+                                </h1>
+                                <p className="text-xs text-gray-400 uppercase tracking-widest">Anime Secured Network</p>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={() => setShowTelegramModal(true)}
+                            className="flex items-center gap-2 bg-blue-500/20 hover:bg-blue-500/40 border border-blue-500/50 px-4 py-2 rounded-lg transition-all"
+                        >
+                            <Bot className="w-5 h-5 text-blue-400" />
+                            <span className="hidden sm:inline text-blue-300 font-medium">Telegram Bot</span>
+                        </button>
+                    </header>
+
+                    {/* Main Content */}
+                    <main className="w-full max-w-4xl flex flex-col gap-6">
+                        
+                        {/* Control Panel */}
+                        <section className="glass-panel rounded-2xl p-6 sm:p-8 relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-violet-500 to-fuchsia-500"></div>
+                            
+                            <div className="flex flex-col sm:flex-row gap-4 items-end">
+                                <div className="w-full sm:w-1/2 flex flex-col gap-2">
+                                    <label className="text-sm text-gray-300 font-medium ml-1">Kustom Nama Email</label>
+                                    <input 
+                                        type="text" 
+                                        value={emailName}
+                                        onChange={(e) => setEmailName(e.target.value.replace(/[^a-zA-Z0-9]/g, ''))}
+                                        placeholder="masukkan_nama"
+                                        className="bg-gray-900/50 border border-gray-600 focus:border-violet-500 rounded-xl px-4 py-3 text-white outline-none transition-all w-full"
+                                    />
+                                </div>
+                                
+                                <div className="w-full sm:w-1/3 flex flex-col gap-2">
+                                    <label className="text-sm text-gray-300 font-medium ml-1">Pilih Domain</label>
+                                    <div className="relative">
+                                        <select 
+                                            value={selectedDomain}
+                                            onChange={(e) => setSelectedDomain(e.target.value)}
+                                            className="bg-gray-900/50 border border-gray-600 focus:border-violet-500 rounded-xl px-4 py-3 text-white outline-none transition-all w-full appearance-none cursor-pointer"
+                                        >
+                                            {DOMAINS.map(domain => (
+                                                <option key={domain} value={domain} className="bg-gray-800 text-white">@{domain}</option>
+                                            ))}
+                                        </select>
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="w-full sm:w-auto flex gap-2">
+                                    <button 
+                                        onClick={generateRandomName}
+                                        className="flex-1 sm:flex-none bg-gray-800 hover:bg-gray-700 border border-gray-600 p-3 rounded-xl transition-all flex justify-center items-center"
+                                        title="Acak Nama"
+                                    >
+                                        <RefreshCw className="w-5 h-5 text-gray-300" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="mt-6 bg-black/40 border border-violet-500/30 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-center gap-4 glow-anim">
+                                <div className="flex items-center gap-3 overflow-hidden w-full">
+                                    <Mail className="w-6 h-6 text-violet-400 flex-shrink-0" />
+                                    <span className="text-lg sm:text-xl font-mono text-white truncate">
+                                        {getFullEmail()}
+                                    </span>
+                                </div>
+                                <button 
+                                    onClick={copyToClipboard}
+                                    className={`w-full sm:w-auto px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
+                                        copied ? 'bg-green-500 text-white' : 'bg-violet-600 hover:bg-violet-500 text-white'
+                                    }`}
+                                >
+                                    {copied ? <React.Fragment>Tersalin! ✓</React.Fragment> : <React.Fragment><Copy className="w-5 h-5" /> Salin Email</React.Fragment>}
+                                </button>
+                            </div>
+                        </section>
+
+                        {/* View Area */}
+                        <section className="glass-panel rounded-2xl h-[500px] flex flex-col relative overflow-hidden">
+                            {selectedEmail ? (
+                                <div className="flex flex-col h-full animate-[slideIn_0.3s_ease-out]">
+                                    <style>{`@keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }`}</style>
+                                    <div className="flex items-center justify-between p-4 border-b border-white/10 bg-black/20">
+                                        <button 
+                                            onClick={() => setSelectedEmail(null)}
+                                            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+                                        >
+                                            <ChevronLeft className="w-5 h-5" />
+                                            <span>Kembali</span>
+                                        </button>
+                                        <button 
+                                            onClick={(e) => deleteEmail(selectedEmail.id, e)}
+                                            className="text-red-400 hover:text-red-300 p-2"
+                                            title="Hapus Email"
+                                        >
+                                            <Trash2 className="w-5 h-5" />
+                                        </button>
+                                    </div>
+                                    <div className="flex-1 p-6 overflow-y-auto font-mono text-sm sm:text-base leading-relaxed text-gray-200 whitespace-pre-wrap bg-black/40">
+                                        {selectedEmail.body}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col h-full">
+                                    <div className="flex items-center justify-between p-4 sm:p-6 border-b border-white/10">
+                                        <h2 className="text-xl font-bold flex items-center gap-2">
+                                            Kotak Masuk 
+                                            <span className="bg-violet-600 text-xs px-2 py-1 rounded-full">{inbox.length}</span>
+                                        </h2>
+                                        <div className="flex gap-2">
+                                            <button 
+                                                onClick={refreshInbox}
+                                                disabled={isRefreshing}
+                                                className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50"
+                                            >
+                                                <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                                            </button>
+                                            {inbox.length > 0 && (
+                                                <button 
+                                                    onClick={deleteAll}
+                                                    className="p-2 bg-red-500/20 text-red-400 hover:bg-red-500/40 rounded-lg transition-colors"
+                                                    title="Hapus Semua"
+                                                >
+                                                    <Trash2 className="w-5 h-5" />
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-2">
+                                        {inbox.length === 0 ? (
+                                            <div className="h-full flex flex-col items-center justify-center text-gray-500 gap-4">
+                                                <div className="relative">
+                                                    <Mail className="w-16 h-16 opacity-50" />
+                                                    <div className="absolute inset-0 bg-violet-500/20 blur-xl rounded-full"></div>
+                                                </div>
+                                                <p className="text-center">Menunggu email masuk secara realtime...<br/><span className="text-xs">Email akan otomatis muncul di sini.</span></p>
+                                            </div>
+                                        ) : (
+                                            inbox.map((email) => (
+                                                <div 
+                                                    key={email.id}
+                                                    onClick={() => setSelectedEmail(email)}
+                                                    className="group bg-gray-900/60 hover:bg-gray-800/80 border border-transparent hover:border-violet-500/30 p-4 rounded-xl cursor-pointer transition-all flex flex-col sm:flex-row justify-between sm:items-center gap-3"
+                                                >
+                                                    <div className="flex items-start sm:items-center gap-4 overflow-hidden">
+                                                        <div className="p-2 bg-violet-500/20 rounded-lg shrink-0 mt-1 sm:mt-0">
+                                                            <Mail className="w-5 h-5 text-violet-400" />
+                                                        </div>
+                                                        <div className="overflow-hidden">
+                                                            <p className="font-bold text-gray-200 truncate">{email.subject}</p>
+                                                            <p className="text-sm text-gray-400 truncate">{email.sender}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 pl-12 sm:pl-0">
+                                                        <span className="text-xs text-gray-500 font-mono">{email.time}</span>
+                                                        <button 
+                                                            onClick={(e) => deleteEmail(email.id, e)}
+                                                            className="opacity-0 group-hover:opacity-100 p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-all"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </section>
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="mt-12 text-center text-gray-500 text-sm">
+                        <p>&copy; 2026 JituPasna Online. All Systems Secured.</p>
+                    </footer>
+
+                    {/* Telegram Modal */}
+                    {showTelegramModal && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                            <div className="glass-panel w-full max-w-md rounded-2xl p-6 relative">
+                                <button 
+                                    onClick={() => setShowTelegramModal(false)}
+                                    className="absolute top-4 right-4 text-gray-400 hover:text-white"
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                </button>
+                                
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="p-3 bg-blue-500/20 rounded-xl">
+                                        <Bot className="w-6 h-6 text-blue-400" />
+                                    </div>
+                                    <h3 className="text-xl font-bold">Integrasi Telegram</h3>
+                                </div>
+                                
+                                <div className="space-y-4 text-gray-300 text-sm">
+                                    <p>Dapatkan notifikasi dan baca email masuk langsung dari Telegram Anda!</p>
+                                    <div className="bg-black/50 p-4 rounded-xl border border-white/5 space-y-3">
+                                        <p className="font-bold text-white">Langkah-langkah:</p>
+                                        <ol className="list-decimal pl-4 space-y-2">
+                                            <li>Buka Telegram dan cari Bot: <strong className="text-blue-400">@JituPasnaMailBot</strong></li>
+                                            <li>Kirim perintah <code className="bg-gray-800 px-1 py-0.5 rounded text-violet-300">/start</code></li>
+                                            <li>Kirim perintah <code className="bg-gray-800 px-1 py-0.5 rounded text-violet-300">/link {getFullEmail()}</code></li>
+                                            <li>Email masuk akan diteruskan ke chat.</li>
+                                        </ol>
+                                    </div>
+                                    <p className="text-xs text-gray-400 italic mt-4">*Membutuhkan Cloudflare Worker yang aktif.</p>
+                                </div>
+                                
+                                <button 
+                                    onClick={() => window.open('https://t.me/BotFather', '_blank')}
+                                    className="w-full mt-6 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
+                                >
+                                    Buat Bot Telegram <ExternalLink className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // Render Aplikasi ke dalam div #root
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
