@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JituPasna Temp Mail</title>
+    <title>GGTeam Mail</title>
     
     <!-- Memuat Tailwind CSS langsung dari CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -88,6 +88,51 @@
             'dua.jitupasna.online',
             'tiga.jitupasna.online'
         ];
+
+        // --- Utility Pembersih MIME / Multipart Email ---
+        const cleanEmailContent = (rawText) => {
+            if (!rawText) return '';
+            
+            let cleaned = rawText;
+
+            // 1. Coba cari blok "text/plain" dari format multipart MIME
+            if (cleaned.includes('Content-Type: text/plain')) {
+                // Pecah string berdasarkan boundary (ex: --000000000000310792064b7d5e83)
+                const parts = cleaned.split(/--[a-zA-Z0-9_+-]+/);
+                for (let part of parts) {
+                    if (part.includes('Content-Type: text/plain')) {
+                        // Pisahkan bagian headers dengan isi (dipisah 2 baris kosong)
+                        const splitBody = part.split(/\r?\n\r?\n/);
+                        if (splitBody.length > 1) {
+                            // Kembalikan hanya isinya, potong whitespace
+                            let extracted = splitBody.slice(1).join('\n\n').trim();
+                            // Hapus sisa-sisa quoted-printable jika ada
+                            extracted = extracted.replace(/=C2=A0/g, ' '); 
+                            extracted = extracted.replace(/=\r?\n/g, '');
+                            return extracted;
+                        }
+                    }
+                }
+            }
+
+            // 2. Fallback: Bersihkan paksa secara manual jika format "text/plain" tidak terdeteksi bersih
+            // Hapus kode boundary MIME
+            cleaned = cleaned.replace(/--[a-zA-Z0-9_+-]+/g, '');
+            // Hapus header Content-Type beserta argumennya
+            cleaned = cleaned.replace(/Content-Type:.*?(\r?\n|$)/gi, '');
+            // Hapus header Content-Transfer-Encoding
+            cleaned = cleaned.replace(/Content-Transfer-Encoding:.*?(\r?\n|$)/gi, '');
+            // Hapus metadata charset
+            cleaned = cleaned.replace(/charset=.*?(\r?\n|$)/gi, '');
+            // Hapus semua tag HTML jika kebetulan menampilkan versi text/html
+            cleaned = cleaned.replace(/<[^>]+>/g, '');
+            // Bersihkan sisa karakter encoding aneh bawaan email
+            cleaned = cleaned.replace(/=C2=A0/g, ' '); 
+            cleaned = cleaned.replace(/=\r?\n/g, '');
+            
+            // Hapus spasi/baris kosong berlebih di awal dan akhir
+            return cleaned.trim();
+        };
 
         function App() {
             const [emailName, setEmailName] = useState('');
@@ -181,7 +226,7 @@
                                 <h1 className="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-violet-400 to-fuchsia-400 tracking-wider">
                                     JituPasna Mail
                                 </h1>
-                                <p className="text-xs text-gray-400 uppercase tracking-widest">Anime Secured Network</p>
+                                <p className="text-xs text-gray-400 uppercase tracking-widest">Scure Temp Mail System</p>
                             </div>
                         </div>
                         <button 
@@ -281,7 +326,8 @@
                                         </button>
                                     </div>
                                     <div className="flex-1 p-6 overflow-y-auto font-mono text-sm sm:text-base leading-relaxed text-gray-200 whitespace-pre-wrap bg-black/40">
-                                        {selectedEmail.body}
+                                        {/* Implementasi Fungsi Pembersih pada Badan Email */}
+                                        {cleanEmailContent(selectedEmail.body)}
                                     </div>
                                 </div>
                             ) : (
@@ -356,7 +402,7 @@
 
                     {/* Footer */}
                     <footer className="mt-12 text-center text-gray-500 text-sm">
-                        <p>&copy; 2026 JituPasna Online. All Systems Secured.</p>
+                        <p>&copy; 2026 GGTeam. All Systems Secured.</p>
                     </footer>
 
                     {/* Telegram Modal */}
