@@ -3,145 +3,236 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GGTeam - Temp Email</title>
-    <!-- Tailwind CSS untuk styling responsif cepat -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome untuk Icon -->
+    <title>GGTeam System - Link Start</title>
+    
+    <!-- Fonts: Rajdhani untuk UI Game, Orbitron untuk Logo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
+        :root {
+            --game-cyan: #00f3ff;
+            --game-orange: #ff7700;
+            --game-bg: rgba(10, 15, 30, 0.85);
+            --game-border: rgba(0, 243, 255, 0.4);
+        }
+
         body {
-            font-family: 'Nunito', sans-serif;
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            background: url('https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=2000&auto=format&fit=crop') no-repeat center center fixed;
-            background-size: cover;
-            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            margin: 0; padding: 0; min-height: 100vh;
+            background-color: #050814;
+            color: #e2e8f0;
             overflow-x: hidden;
+            user-select: none; /* Nuansa aplikasi game */
         }
 
-        /* Overlay gelap agar UI terbaca */
-        .overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 27, 75, 0.7) 100%);
-            z-index: -1;
+        /* Latar Belakang Gambar & Canvas */
+        .bg-image {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=2000&auto=format&fit=crop') no-repeat center center fixed;
+            background-size: cover;
+            opacity: 0.3; z-index: -3;
+        }
+        #particle-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -2; pointer-events: none;
         }
 
-        /* Glassmorphism Effect */
-        .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        /* Arsitektur Panel HUD Game (Potongan Sudut) */
+        .game-panel {
+            background: var(--game-bg);
+            backdrop-filter: blur(10px);
+            border-top: 2px solid var(--game-cyan);
+            border-bottom: 2px solid var(--game-cyan);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.1), inset 0 0 20px rgba(0, 243, 255, 0.05);
+            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .game-panel::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 15px; height: 15px;
+            border-top: 2px solid var(--game-cyan); border-left: 2px solid var(--game-cyan);
         }
 
-        /* Sakura Animation */
-        .sakura {
-            position: fixed;
-            top: -10vh;
-            background: linear-gradient(135deg, #ffb7c5, #ff9eaf);
-            border-radius: 15px 0 15px 0;
-            opacity: 0.8;
-            pointer-events: none;
-            z-index: -1;
-            animation: fall linear infinite;
+        /* Tombol Bergaya SAO / Game */
+        .game-btn {
+            background: rgba(0, 243, 255, 0.1);
+            border: 1px solid var(--game-cyan);
+            color: var(--game-cyan);
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            text-transform: uppercase; font-weight: 700; letter-spacing: 1px;
+            transition: all 0.2s;
+            position: relative; overflow: hidden;
         }
-        @keyframes fall {
-            0% { transform: translateY(0vh) translateX(0) rotate(0deg); opacity: 0; }
-            10% { opacity: 1; }
-            100% { transform: translateY(110vh) translateX(100px) rotate(360deg); opacity: 0; }
+        .game-btn:hover {
+            background: var(--game-cyan); color: #000;
+            box-shadow: 0 0 15px var(--game-cyan);
+            transform: scale(1.02);
+        }
+        .game-btn-danger {
+            background: rgba(255, 51, 102, 0.1); border-color: #ff3366; color: #ff3366;
+        }
+        .game-btn-danger:hover {
+            background: #ff3366; color: #fff; box-shadow: 0 0 15px #ff3366;
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb { background: rgba(255, 183, 197, 0.5); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 183, 197, 0.8); }
-
-        /* Loader */
-        .loader {
-            border: 3px solid rgba(255,255,255,0.1);
-            border-top: 3px solid #ffb7c5;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
+        /* Input Game Style */
+        .game-input {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff; font-family: 'Rajdhani', monospace;
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+            transition: all 0.3s;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .game-input:focus {
+            outline: none; border-color: var(--game-cyan);
+            box-shadow: inset 0 0 10px rgba(0, 243, 255, 0.3);
+        }
 
-        /* Clean Iframe for Email Body */
+        /* Logo Bergerak Keren GG */
+        .gg-logo-wrapper {
+            position: relative; width: 70px; height: 70px;
+            display: flex; justify-content: center; align-items: center;
+            perspective: 1000px;
+        }
+        .gg-logo-core {
+            font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 900;
+            color: #fff; text-shadow: 0 0 10px var(--game-cyan), 0 0 20px var(--game-cyan);
+            z-index: 10; animation: floatLogo 3s ease-in-out infinite alternate;
+        }
+        .gg-ring {
+            position: absolute; border-radius: 50%;
+            border: 2px solid transparent; border-top-color: var(--game-cyan); border-bottom-color: var(--game-cyan);
+            animation: spinRing linear infinite;
+        }
+        .ring-1 { width: 60px; height: 60px; animation-duration: 4s; }
+        .ring-2 { width: 75px; height: 75px; border-top-color: var(--game-orange); border-bottom-color: transparent; border-left-color: var(--game-orange); animation-duration: 3s; animation-direction: reverse; }
+        
+        @keyframes spinRing { 100% { transform: rotate(360deg); } }
+        @keyframes floatLogo { 0% { transform: translateY(-3px) scale(1); } 100% { transform: translateY(3px) scale(1.05); } }
+
+        /* Item Pesan Masuk */
+        .msg-item {
+            border-left: 3px solid transparent; transition: all 0.2s;
+            background: rgba(255,255,255,0.03); clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+        }
+        .msg-item:hover { background: rgba(0, 243, 255, 0.1); border-left-color: var(--game-cyan); transform: translateX(5px); }
+        .msg-active { background: rgba(0, 243, 255, 0.15); border-left-color: var(--game-cyan); }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.5); }
+        ::-webkit-scrollbar-thumb { background: var(--game-cyan); }
+
+        /* Status Blinker */
+        .blinker { width: 8px; height: 8px; background-color: var(--game-orange); border-radius: 50%; display: inline-block; box-shadow: 0 0 8px var(--game-orange); animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* Iframe */
         #email-body-frame {
-            width: 100%;
-            height: 100%;
-            min-height: 400px;
-            border: none;
-            background-color: white;
-            border-radius: 0.5rem;
+            width: 100%; height: 100%; min-height: 400px; border: none;
+            background-color: #e2e8f0; /* Terang agar isi HTML email asli terbaca */
+            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+        }
+
+        /* Sistem Toast / Alert */
+        .system-alert {
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid var(--game-cyan);
+            border-left: 4px solid var(--game-cyan);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+            font-family: 'Rajdhani', sans-serif; text-transform: uppercase; letter-spacing: 1px;
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
         }
     </style>
 </head>
 <body class="antialiased">
 
-    <!-- Animasi Background & Overlay -->
-    <div class="overlay"></div>
-    <div id="sakura-container"></div>
+    <!-- Background Elements -->
+    <div class="bg-image"></div>
+    <canvas id="particle-canvas"></canvas>
 
-    <div class="container mx-auto px-4 py-8 max-w-6xl">
+    <div class="container mx-auto px-4 py-8 max-w-6xl relative z-10">
         
-        <!-- Header -->
-        <header class="flex flex-col md:flex-row justify-between items-center mb-8 glass p-6 rounded-2xl">
-            <div class="flex items-center gap-4 mb-4 md:mb-0">
-                <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-pink-500 to-purple-500 flex items-center justify-center text-2xl shadow-[0_0_15px_rgba(236,72,153,0.5)]">
-                    <i class="fa-solid fa-envelope-open-text"></i>
+        <!-- HEADER HUD -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 game-panel p-4 md:p-6">
+            <div class="flex items-center gap-6">
+                <!-- Logo Animasi -->
+                <div class="gg-logo-wrapper">
+                    <div class="gg-ring ring-1"></div>
+                    <div class="gg-ring ring-2"></div>
+                    <div class="gg-logo-core">GG</div>
                 </div>
                 <div>
-                    <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300 tracking-wider">GGTeam</h1>
-                    <p class="text-sm text-gray-300">Temporary Email</p>
+                    <h1 class="text-3xl md:text-4xl font-bold tracking-widest text-white" style="font-family: 'Orbitron', sans-serif;">
+                        SYSTEM <span class="text-[#00f3ff]">MAIL</span>
+                    </h1>
+                    <div class="flex items-center gap-3 mt-1">
+                        <span class="text-[10px] bg-[#00f3ff] text-black px-2 py-0.5 font-bold uppercase tracking-widest clip-path-slant">LVL 99</span>
+                        <span class="text-xs text-[#00f3ff] tracking-widest uppercase"><i class="fa-solid fa-wifi mr-1"></i> NerveGear Connected</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6 md:mt-0 flex gap-4">
+                <div class="text-right border-r border-[#00f3ff]/30 pr-4">
+                    <div class="text-[10px] text-gray-400 font-bold tracking-widest">SERVER HP</div>
+                    <div class="w-24 h-2 bg-gray-800 mt-1 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 h-full bg-green-500 w-full shadow-[0_0_10px_#22c55e]"></div>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-[10px] text-gray-400 font-bold tracking-widest">MANA / MP</div>
+                    <div class="w-24 h-2 bg-gray-800 mt-1 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 h-full bg-[#00f3ff] w-[85%] shadow-[0_0_10px_#00f3ff]"></div>
+                    </div>
                 </div>
             </div>
         </header>
 
-        <!-- Email Control Panel -->
-        <div class="glass p-6 rounded-2xl mb-8">
-            <div class="flex flex-col md:flex-row gap-4">
+        <!-- CONTROL PANEL -->
+        <div class="game-panel p-6 md:p-8 mb-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 
                 <!-- Display Current Email -->
-                <div class="flex-1">
-                    <label class="block text-sm text-pink-200 mb-2 font-semibold">Alamat Email Anda Saat Ini:</label>
-                    <div class="flex relative">
-                        <input type="text" id="current-email" readonly value="loading..." 
-                               class="w-full bg-black/40 border border-pink-500/30 text-white rounded-l-lg p-4 text-lg outline-none font-mono">
-                        <button onclick="copyEmail()" class="bg-pink-600 hover:bg-pink-700 px-6 rounded-r-lg font-bold transition-colors flex items-center justify-center gap-2">
-                            <i class="fa-regular fa-copy"></i> Copy
+                <div>
+                    <label class="block text-xs text-[#00f3ff] mb-2 font-bold tracking-widest uppercase"><i class="fa-solid fa-crosshairs mr-1"></i> Target Player ID (Email Saat Ini)</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="current-email" readonly value="INITIALIZING LINK..." 
+                               class="w-full game-input p-3 text-lg font-bold text-[#00f3ff]">
+                        <button onclick="copyEmail()" class="game-btn px-6 flex items-center justify-center gap-2">
+                            <i class="fa-regular fa-copy"></i>
                         </button>
                     </div>
                 </div>
 
                 <!-- Custom Email Generator -->
-                <div class="flex-1 border-t md:border-t-0 md:border-l border-white/10 pt-4 md:pt-0 md:pl-6">
-                    <label class="block text-sm text-pink-200 mb-2 font-semibold">Buat Custom Email:</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="custom-name" placeholder="nama-bebas" 
-                               class="w-1/2 bg-black/40 border border-white/20 text-white rounded-lg p-3 outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all">
-                        <span class="flex items-center text-xl text-pink-400 font-bold">@</span>
-                        <select id="domain-select" class="w-1/2 bg-black/40 border border-white/20 text-white rounded-lg p-3 outline-none focus:border-pink-500 appearance-none">
+                <div class="border-t lg:border-t-0 lg:border-l border-[#00f3ff]/30 pt-6 lg:pt-0 lg:pl-8">
+                    <label class="block text-xs text-[#ff7700] mb-2 font-bold tracking-widest uppercase"><i class="fa-solid fa-wrench mr-1"></i> Forge New ID (Buat Kustom)</label>
+                    <div class="flex gap-2 mb-3">
+                        <input type="text" id="custom-name" placeholder="player_name" 
+                               class="w-1/2 game-input p-3 text-sm">
+                        <div class="flex items-center text-[#ff7700] font-bold">@</div>
+                        <select id="domain-select" class="w-1/2 game-input p-3 text-sm appearance-none cursor-pointer">
                             <option value="jitupasna.online">jitupasna.online</option>
                             <option value="satu.jitupasna.online">satu.jitupasna.online</option>
                             <option value="dua.jitupasna.online">dua.jitupasna.online</option>
                             <option value="tiga.jitupasna.online">tiga.jitupasna.online</option>
                         </select>
                     </div>
-                    <div class="flex gap-2 mt-3">
-                        <button onclick="setCustomEmail()" class="flex-1 bg-purple-600 hover:bg-purple-700 py-2 rounded-lg font-bold transition-all shadow-[0_0_10px_rgba(147,51,234,0.3)]">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i> Buat
+                    <div class="flex gap-3">
+                        <button onclick="setCustomEmail()" class="flex-1 game-btn py-2.5">
+                            <i class="fa-solid fa-khanda mr-2"></i> Equip Custom ID
                         </button>
-                        <button onclick="generateRandom()" class="px-4 bg-gray-600 hover:bg-gray-700 rounded-lg transition-all" title="Acak Email">
-                            <i class="fa-solid fa-dice"></i>
+                        <button onclick="generateRandom()" class="px-5 game-btn border-[#ff7700] text-[#ff7700]" title="Auto Generate">
+                            <i class="fa-solid fa-dice-d20"></i>
                         </button>
                     </div>
                 </div>
@@ -149,53 +240,54 @@
             </div>
         </div>
 
-        <!-- Main Content: Inbox & Reader -->
+        <!-- MAIN INTERFACE: INBOX & READER -->
         <div class="flex flex-col lg:flex-row gap-6 h-[600px]">
             
-            <!-- Inbox List (Left) -->
-            <div class="lg:w-1/3 glass rounded-2xl flex flex-col overflow-hidden">
-                <div class="p-4 border-b border-white/10 bg-black/20 flex justify-between items-center">
-                    <h2 class="font-bold text-lg"><i class="fa-solid fa-inbox text-pink-400 mr-2"></i> Kotak Masuk</h2>
-                    <div class="flex items-center gap-3 text-sm text-gray-300">
-                        <div id="sync-icon" class="hidden loader"></div>
-                        <button onclick="manualRefresh()" class="w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-pink-500/50 rounded-full transition-all text-pink-300 hover:text-white shadow-lg" title="Cek Email Baru (Refresh)">
-                            <i class="fa-solid fa-rotate-right"></i>
+            <!-- Inbox List (Inventory) -->
+            <div class="lg:w-1/3 game-panel flex flex-col overflow-hidden">
+                <div class="p-4 border-b border-[#00f3ff]/30 bg-black/40 flex justify-between items-center">
+                    <h2 class="font-bold text-lg text-white tracking-widest uppercase">
+                        <i class="fa-solid fa-envelope-open-text text-[#00f3ff] mr-2"></i> Message Log
+                    </h2>
+                    
+                    <div class="flex items-center gap-2 text-xs font-bold tracking-widest text-gray-400">
+                        <span id="status-text">SCANNING</span>
+                        <div id="standby-indicator" class="blinker"></div>
+                        <i id="sync-icon" class="fa-solid fa-circle-notch fa-spin text-[#00f3ff] hidden"></i>
+                        <button onclick="manualRefresh()" class="ml-2 hover:text-[#00f3ff] transition-colors" title="Force Scan">
+                            <i class="fa-solid fa-satellite-dish"></i>
                         </button>
                     </div>
                 </div>
                 
-                <div id="inbox-list" class="flex-1 overflow-y-auto p-2">
-                    <!-- Email Items will be injected here -->
-                    <div class="text-center text-gray-400 mt-10">
-                        <i class="fa-regular fa-folder-open text-4xl mb-3 opacity-50"></i>
-                        <p>Belum ada email masuk...</p>
-                    </div>
+                <div id="inbox-list" class="flex-1 overflow-y-auto p-3 space-y-2">
+                    <!-- Data will be injected here -->
                 </div>
             </div>
 
-            <!-- Email Reader (Right) -->
-            <div class="lg:w-2/3 glass rounded-2xl flex flex-col overflow-hidden relative">
-                <!-- Header Email Reader -->
-                <div id="reader-header" class="p-4 border-b border-white/10 bg-black/20 flex justify-between items-start hidden">
-                    <div class="flex-1 overflow-hidden">
-                        <h2 id="view-subject" class="font-bold text-xl mb-1 truncate">Subject</h2>
-                        <p class="text-sm text-gray-300 truncate">Dari: <span id="view-sender" class="font-semibold text-pink-300"></span></p>
-                        <p class="text-xs text-gray-400 mt-1" id="view-date"></p>
+            <!-- Email Reader (Message Detail) -->
+            <div class="lg:w-2/3 game-panel flex flex-col overflow-hidden relative">
+                
+                <!-- Header -->
+                <div id="reader-header" class="p-5 border-b border-[#00f3ff]/30 bg-black/60 flex justify-between items-start hidden">
+                    <div class="flex-1 overflow-hidden pr-4">
+                        <h2 id="view-subject" class="font-bold text-xl mb-1 text-white tracking-wide truncate">Subject</h2>
+                        <p class="text-sm text-gray-400 font-mono">From: <span id="view-sender" class="text-[#00f3ff] font-bold"></span></p>
+                        <p class="text-[10px] text-[#ff7700] mt-1 font-bold tracking-widest" id="view-date"></p>
                     </div>
-                    <button onclick="deleteCurrentEmail()" class="ml-4 p-2 bg-red-500/20 hover:bg-red-500 text-red-300 hover:text-white rounded-lg transition-colors group">
-                        <i class="fa-solid fa-trash-can group-hover:animate-bounce"></i>
+                    <button onclick="deleteCurrentEmail()" class="game-btn game-btn-danger px-4 py-2">
+                        <i class="fa-solid fa-trash-can mr-1"></i> DELETE
                     </button>
                 </div>
 
-                <!-- Body Email Reader -->
-                <div class="flex-1 bg-white relative">
-                    <!-- Placeholder when no email selected -->
-                    <div id="reader-placeholder" class="absolute inset-0 flex flex-col items-center justify-center bg-black/40 text-gray-300 backdrop-blur-md">
-                        <img src="https://media1.tenor.com/m/oWQYkS0oGMAAAAAd/anime-mail.gif" alt="Mail Anime" class="w-48 rounded-xl mb-4 opacity-80 mix-blend-screen">
-                        <p class="text-lg font-semibold">Pilih email untuk membaca</p>
+                <!-- Body Placeholder -->
+                <div class="flex-1 relative p-3 bg-[#0a0f1e]">
+                    <div id="reader-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-[#00f3ff]/50">
+                        <div class="text-6xl mb-4 animate-pulse"><i class="fa-solid fa-vr-cardboard"></i></div>
+                        <h3 class="text-2xl font-bold tracking-widest uppercase font-['Orbitron']">Awaiting Data Packet</h3>
+                        <p class="text-sm font-bold tracking-widest mt-2">Select a message log from the inventory.</p>
                     </div>
                     
-                    <!-- Iframe for displaying clean raw HTML from email without breaking our CSS -->
                     <iframe id="email-body-frame" class="hidden"></iframe>
                 </div>
             </div>
@@ -203,101 +295,164 @@
 
     </div>
 
-    <!-- Notifikasi Toast -->
-    <div id="toast" class="fixed bottom-5 right-5 bg-pink-600 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-3">
-        <i class="fa-solid fa-circle-check"></i>
-        <span id="toast-msg">Berhasil!</span>
+    <!-- System Toast Notification (SAO Style Alert) -->
+    <div id="toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 -translate-y-10 opacity-0 system-alert text-white px-8 py-4 z-50 flex flex-col items-center justify-center transition-all duration-300">
+        <div class="text-[#00f3ff] text-xl mb-1"><i class="fa-solid fa-circle-exclamation" id="toast-icon"></i></div>
+        <span id="toast-title" class="text-[#00f3ff] font-bold text-lg mb-1 leading-none">SYSTEM MESSAGE</span>
+        <span id="toast-msg" class="text-sm text-gray-300">Operation Successful</span>
     </div>
 
-    <!-- SCRIPT LOGIKA -->
+    <!-- LOGIC & SCRIPTS -->
     <script>
-        // --- ANIMASI SAKURA BACKGROUND ---
-        function createSakura() {
-            const container = document.getElementById('sakura-container');
-            const petalCount = 30;
-            
-            for(let i=0; i<petalCount; i++) {
-                let petal = document.createElement('div');
-                petal.classList.add('sakura');
-                
-                // Random properties
-                let size = Math.random() * 10 + 5; // 5px to 15px
-                let left = Math.random() * 100; // 0vw to 100vw
-                let duration = Math.random() * 5 + 5; // 5s to 10s
-                let delay = Math.random() * 5;
-                
-                petal.style.width = `${size}px`;
-                petal.style.height = `${size}px`;
-                petal.style.left = `${left}vw`;
-                petal.style.animationDuration = `${duration}s`;
-                petal.style.animationDelay = `${delay}s`;
-                
-                container.appendChild(petal);
+        // --- 1. SINTESIS AUDIO (WEB AUDIO API) KHAS SAO ---
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
             }
         }
-        createSakura();
+
+        // Agar audio diizinkan browser, inisialisasi pada klik pertama di layar
+        document.body.addEventListener('click', initAudio, { once: true });
+
+        function playSAONotification() {
+            if (!audioCtx) return;
+            
+            const osc1 = audioCtx.createOscillator();
+            const osc2 = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            // Efek suara dentingan kristal futuristik (SAO Menu Sound)
+            osc1.type = 'sine';
+            osc2.type = 'triangle';
+            
+            // Frequencies for a glassy, high-tech chime
+            osc1.frequency.setValueAtTime(1200, audioCtx.currentTime);
+            osc1.frequency.exponentialRampToValueAtTime(2400, audioCtx.currentTime + 0.1);
+            
+            osc2.frequency.setValueAtTime(1200, audioCtx.currentTime);
+            osc2.frequency.exponentialRampToValueAtTime(3600, audioCtx.currentTime + 0.1);
+
+            // Envelope (Volume)
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.05);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+
+            osc1.connect(gainNode);
+            osc2.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            osc1.start(); osc2.start();
+            osc1.stop(audioCtx.currentTime + 0.6);
+            osc2.stop(audioCtx.currentTime + 0.6);
+        }
 
 
-        // --- STATE & VARIABEL APLIKASI ---
+        // --- 2. ANIMASI BACKGROUND PARTIKEL REALISTIS ---
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.reset();
+                this.y = Math.random() * canvas.height; // Muncul acak pertama kali
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + Math.random() * 100;
+                this.size = Math.random() * 2 + 1;
+                this.speed = Math.random() * 1 + 0.5;
+                this.opacity = Math.random() * 0.5 + 0.1;
+                this.color = Math.random() > 0.5 ? '#00f3ff' : '#ff7700';
+            }
+            update() {
+                this.y -= this.speed;
+                if (this.y < -10) this.reset();
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = this.opacity;
+                ctx.fill();
+                // Glow
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+            }
+        }
+
+        for (let i = 0; i < 50; i++) particles.push(new Particle());
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+
+        // --- 3. STATE APLIKASI EMAIL ---
         let currentEmailAddress = "";
         let inboxData = [];
         let activeEmailId = null;
         let pollingInterval = null;
-
         const DOMAINS = ['jitupasna.online', 'satu.jitupasna.online', 'dua.jitupasna.online', 'tiga.jitupasna.online'];
         
-        // --- INISIALISASI ---
+        // PENTING: GANTI INI DENGAN URL WORKER CLOUDFLARE ANDA!
+        const WORKER_URL = "https://mail.ggteam.workers.dev"; 
+
         window.onload = () => {
-            generateRandom(); // Buat email random saat web dimuat
-            startRealtimeCheck(); // Mulai simulasi cek email masuk
+            generateRandom();
+            startRealtimeCheck();
         };
 
-
-        // --- FUNGSI EMAIL ADDRESS ---
         function generateRandom() {
             const randomString = Math.random().toString(36).substring(2, 10);
             const randomDomain = DOMAINS[Math.floor(Math.random() * DOMAINS.length)];
             currentEmailAddress = `${randomString}@${randomDomain}`;
             
-            document.getElementById('current-email').value = currentEmailAddress;
             document.getElementById('custom-name').value = randomString;
             document.getElementById('domain-select').value = randomDomain;
-            
-            resetInbox();
-            showToast("Alamat Email Baru Dibuat!");
+            updateUIState();
         }
 
         function setCustomEmail() {
+            initAudio(); // Pastikan audio nyala
             const name = document.getElementById('custom-name').value.trim().toLowerCase().replace(/[^a-z0-9.-]/g, '');
             const domain = document.getElementById('domain-select').value;
-            
-            if(!name) {
-                showToast("Nama email tidak boleh kosong!", true);
-                return;
-            }
-
+            if(!name) { showToast("ERROR", "Player ID cannot be empty", true); return; }
             currentEmailAddress = `${name}@${domain}`;
+            updateUIState();
+        }
+
+        function updateUIState() {
             document.getElementById('current-email').value = currentEmailAddress;
-            
             resetInbox();
-            showToast(`Email diubah ke: ${currentEmailAddress}`);
+            showToast("LINK START", `Identity set to: ${currentEmailAddress}`);
         }
 
         function copyEmail() {
+            initAudio();
             const emailInput = document.getElementById('current-email');
-            emailInput.select();
-            emailInput.setSelectionRange(0, 99999); // Untuk Mobile
-            try {
-                navigator.clipboard.writeText(emailInput.value);
-                showToast("Alamat Email disalin ke clipboard!");
-            } catch(e) {
-                document.execCommand('copy');
-                showToast("Alamat Email disalin!");
-            }
+            emailInput.select(); emailInput.setSelectionRange(0, 99999);
+            try { navigator.clipboard.writeText(emailInput.value); showToast("SYSTEM", "Data copied to clipboard"); } 
+            catch(e) { document.execCommand('copy'); showToast("SYSTEM", "Data copied"); }
         }
 
-
-        // --- FUNGSI KOTAK MASUK (INBOX) & API MOCK ---
+        // --- 4. INBOX LOGIC ---
         function resetInbox() {
             inboxData = [];
             activeEmailId = null;
@@ -306,57 +461,61 @@
         }
 
         function startRealtimeCheck() {
-            // Mengecek API setiap 5 detik
             pollingInterval = setInterval(fetchEmailsFromServer, 5000);
         }
 
         function manualRefresh() {
-            showToast("Mengecek kotak masuk...", false);
-            const icon = document.querySelector('.fa-rotate-right');
-            icon.classList.add('animate-spin');
-            
-            fetchEmailsFromServer().then(() => {
-                setTimeout(() => icon.classList.remove('animate-spin'), 600);
-            });
+            initAudio();
+            fetchEmailsFromServer(true);
         }
 
-        // --- FETCH DARI BACKEND CLOUDFLARE WORKER ---
-        async function fetchEmailsFromServer() {
-            // GANTI URL DI BAWAH DENGAN URL WORKER CLOUDFLARE ANDA!
-            // Contoh: https://jitumail-api.username.workers.dev
-            const WORKER_URL = "https://mail.ggteam.workers.dev"; 
+        function setSyncStatus(isSyncing) {
+            const standby = document.getElementById('standby-indicator');
+            const syncIcon = document.getElementById('sync-icon');
+            const statusText = document.getElementById('status-text');
+
+            if(isSyncing) {
+                standby.classList.add('hidden');
+                syncIcon.classList.remove('hidden');
+                statusText.textContent = "SYNCING";
+            } else {
+                syncIcon.classList.add('hidden');
+                standby.classList.remove('hidden');
+                statusText.textContent = "SCANNING";
+            }
+        }
+
+        async function fetchEmailsFromServer(isManual = false) {
+            if(!currentEmailAddress || WORKER_URL.includes("MASUKKAN_URL")) {
+                if(isManual) showToast("WARNING", "Connect backend URL first.", true);
+                return;
+            }
             
-            if(!currentEmailAddress) return;
-            
-            document.getElementById('sync-icon').classList.remove('hidden');
+            setSyncStatus(true);
             
             try {
-                // Memanggil endpoint GET /api/emails
                 const response = await fetch(`${WORKER_URL}/api/emails?address=${currentEmailAddress}`);
-                
-                if (!response.ok) throw new Error("Gagal terhubung ke server");
+                if (!response.ok) throw new Error("Connection Failed");
                 
                 const data = await response.json();
                 
-                // Jika ada email baru (jumlah email di server > jumlah di local web)
                 if(data.emails && data.emails.length > inboxData.length) {
                     const diff = data.emails.length - inboxData.length;
                     inboxData = data.emails;
                     renderInbox();
-                    showToast(`Ada ${diff} Email Baru Masuk! 🌸`);
+                    
+                    // Mainkan suara Game Notification!
+                    playSAONotification();
+                    showToast("NEW MESSAGE", `Received ${diff} new data packet(s)!`);
                 } else if (data.emails) {
-                    // Update data agar tetap sinkron
                     inboxData = data.emails;
                     renderInbox();
+                    if(isManual) showToast("SCAN COMPLETE", "No new data packets found.");
                 }
-
             } catch (error) {
-                console.error("Gagal mengambil email:", error);
-                // Matikan notifikasi error terus-menerus saat auto-refresh, hanya log di console
+                if(isManual) showToast("ERROR", "Server connection lost.", true);
             } finally {
-                setTimeout(() => {
-                    document.getElementById('sync-icon').classList.add('hidden');
-                }, 500);
+                setTimeout(() => setSyncStatus(false), 500);
             }
         }
 
@@ -365,25 +524,23 @@
             
             if (inboxData.length === 0) {
                 listContainer.innerHTML = `
-                    <div class="text-center text-gray-400 mt-10">
+                    <div class="text-center text-[#00f3ff]/50 mt-10">
                         <i class="fa-solid fa-radar text-4xl mb-3 opacity-50 block"></i>
-                        <p>Belum ada email masuk...</p>
-                        <p class="text-xs mt-2 text-pink-300/60">Klik tombol refresh di atas</p>
+                        <p class="font-bold tracking-widest text-sm uppercase">Inventory Empty</p>
                     </div>`;
                 return;
             }
 
             let html = '';
             inboxData.forEach(email => {
-                const isActive = email.id === activeEmailId ? 'bg-pink-500/20 border-l-4 border-pink-500' : 'bg-black/30 hover:bg-white/5 border-l-4 border-transparent';
-                
+                const isActive = email.id === activeEmailId ? 'msg-active' : '';
                 html += `
-                    <div onclick="viewEmail('${email.id}')" class="cursor-pointer p-4 mb-2 rounded-r-lg transition-all duration-200 ${isActive}">
+                    <div onclick="viewEmail('${email.id}')" class="msg-item cursor-pointer p-4 ${isActive}">
                         <div class="flex justify-between items-center mb-1">
-                            <h3 class="font-bold text-pink-200 truncate w-3/4">${email.sender}</h3>
-                            <span class="text-xs text-gray-400 whitespace-nowrap">${email.date}</span>
+                            <h3 class="font-bold text-white truncate w-3/4 text-sm">${email.sender}</h3>
+                            <span class="text-[10px] text-[#ff7700] font-bold tracking-widest bg-black/50 px-2 py-0.5 rounded">${email.date}</span>
                         </div>
-                        <p class="text-sm text-gray-300 truncate">${email.subject}</p>
+                        <p class="text-xs text-gray-400 truncate">${email.subject}</p>
                     </div>
                 `;
             });
@@ -391,25 +548,22 @@
         }
 
         function viewEmail(id) {
+            initAudio();
             activeEmailId = id;
-            renderInbox(); // Update highlight
-            
+            renderInbox(); 
             const email = inboxData.find(e => e.id === id);
             if(!email) return;
 
-            // Update Header Pembaca
             document.getElementById('view-subject').textContent = email.subject;
             document.getElementById('view-sender').textContent = email.sender;
-            document.getElementById('view-date').textContent = email.date;
+            document.getElementById('view-date').textContent = "LOGGED: " + email.date;
             
-            // Tampilkan Header
             document.getElementById('reader-header').classList.remove('hidden');
             document.getElementById('reader-placeholder').classList.add('hidden');
             
-            // Render Isi Bersih di dalam Iframe (PENTING untuk mencegah bentrok CSS)
             const iframe = document.getElementById('email-body-frame');
             iframe.classList.remove('hidden');
-            iframe.srcdoc = email.bodyHtml || email.bodyText || "Isi email kosong.";
+            iframe.srcdoc = email.bodyHtml || email.bodyText || "<div style='font-family:sans-serif; text-align:center; margin-top:50px;'>DATA CORRUPTED.</div>";
         }
 
         function hideEmailReader() {
@@ -420,40 +574,50 @@
         }
 
         function deleteCurrentEmail() {
+            initAudio();
             if(!activeEmailId) return;
-            
-            // Hapus dari array
             inboxData = inboxData.filter(e => e.id !== activeEmailId);
-            
-            showToast("Email berhasil dihapus");
+            showToast("SYSTEM", "Data packet destroyed");
             activeEmailId = null;
             renderInbox();
             hideEmailReader();
         }
 
-
-        // --- UI UTILITIES ---
-        function showToast(message, isError = false) {
+        // --- 5. TOAST (SAO SYSTEM ALERT) ---
+        function showToast(title, message, isError = false) {
             const toast = document.getElementById('toast');
+            const titleEl = document.getElementById('toast-title');
             const msgEl = document.getElementById('toast-msg');
-            const icon = toast.querySelector('i');
+            const icon = document.getElementById('toast-icon');
             
+            titleEl.textContent = title;
             msgEl.textContent = message;
             
             if(isError) {
-                toast.classList.replace('bg-pink-600', 'bg-red-600');
-                icon.className = "fa-solid fa-circle-exclamation";
+                toast.style.borderColor = "#ff3366";
+                toast.style.borderLeftColor = "#ff3366";
+                toast.style.boxShadow = "0 0 20px rgba(255, 51, 102, 0.4)";
+                titleEl.style.color = "#ff3366";
+                icon.className = "fa-solid fa-triangle-exclamation text-[#ff3366]";
             } else {
-                toast.classList.replace('bg-red-600', 'bg-pink-600');
-                icon.className = "fa-solid fa-circle-check";
+                toast.style.borderColor = "var(--game-cyan)";
+                toast.style.borderLeftColor = "var(--game-cyan)";
+                toast.style.boxShadow = "0 0 20px rgba(0, 243, 255, 0.3)";
+                titleEl.style.color = "var(--game-cyan)";
+                icon.className = "fa-solid fa-circle-info text-[#00f3ff]";
             }
-
-            toast.classList.remove('translate-y-20', 'opacity-0');
             
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
+            // Animasi turun dari atas tengah (SAO style)
+            toast.classList.remove('-translate-y-10', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => { 
+                toast.classList.add('-translate-y-10', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
             }, 3000);
         }
     </script>
 </body>
 </html>
+
+
